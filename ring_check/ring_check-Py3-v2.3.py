@@ -18,7 +18,7 @@
  2019-07-08v2.1: Use API to retrieve profile ID
                  Display improved
  2019-07-08v2.2: Username case insensitive
-
+ 2019-10-07v2.3: Fixed typos
 '''
 
 import re, sys
@@ -51,13 +51,13 @@ User2 = Tmp[Tmp.find("username\":\"")+11:Tmp.find("\"}]}")]
 ID2 = Tmp[Tmp.find("\"id\":\"")+6:Tmp.find("\",\"username")]
 
 
-print (' Get Challanges made by ' + User1 + '. Please wait.')
+print (' Get Challenges made by ' + User1 + '. Please wait.')
 Tmp = urllib.urlopen(URL+'/profile/'+ID1).read()
 Lst1 = re.findall(b'><div style="width: 150px; display: inline-block"><b>(\S*.*)',Tmp); Lst1.sort()
 for i in range(len(Lst1)):
     Lst1[i] = str(Lst1[i]).replace("</a>'","").replace("</a>\"","").replace("</b></div>"," / ").replace("b'","").replace("b\"","")
 
-print (' Get Challanges made by ' + User2 + '. Please wait.')
+print (' Get Challenges made by ' + User2 + '. Please wait.')
 Tmp = urllib.urlopen(URL+'/profile/'+ID2).read()
 Lst2 = re.findall(b'><div style="width: 150px; display: inline-block"><b>(\S*.*)',Tmp); Lst2.sort()
 for i in range(len(Lst2)):
