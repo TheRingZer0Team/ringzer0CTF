@@ -1,0 +1,200 @@
+#!/usr/bin/env python3
+
+'''
+
+ Initial version by: jusb3
+ Rewrote by        : TheIndian, July 4th, 2019
+ Redistribution authorized by jusb3
+ New features:
+     - Work with Python3 only
+     - Display the same Challenges solved by User1 AND User2
+     - Display the Challenges solved by User1 but NOT by User2
+     - Display the Challenges solved by User2 but NOT by User1
+     - Challenges displayed with names instead of with the number
+
+ 2019-07-08 : Search improved and accurate
+              Display improved
+
+ 2019-07-08v2.1: Use API to retrieve profile ID
+                 Display improved
+ 2019-07-08v2.2: Username case insensitive
+ 2019-10-07v2.3: Fixed typos
+ 2019-10-07v2.4: Added some new features according to the API
+'''
+
+import json
+import re, sys
+import requests
+import urllib.request as urllib
+
+URL  = 'https://ringzer0ctf.com'
+APIURLUserInfo = URL + '/api/user/{user}'
+APIURLUserScore = URL + '/api/score/{userid}'
+APIURLChallengeInfo = URL + '/api/challenge/{challengeid}'
+APIURLListUserByChallenge = URL + '/api/solved/{challengeid}'
+
+def PrintBanner():
+    print("   ___  _          ____          ___ \n")
+    print("  / _ \\(_)__  ___ /_  / ___ ____/ _ \\\n")
+    print(" / , _/ / _ \\/ _ `// /_/ -_) __/ // /\n")
+    print("/_/|_/_/_//_/\\_, //___/\\__/_/  \\___/ \n")
+    print("            /___/                    \n")
+
+def MainMenu():
+    MsgOptionMenu = \
+    'Choose an option between:\n'\
+    '\t(1) Compare 2 users\n'\
+    '\t(2) Show a user information\n'\
+    '\t(3) Show a user score\n'\
+    '\t(4) Show a challenge information\n'\
+    '\t(5) List users who solved a challenge\n'\
+    '\n'\
+    'You choice: '
+    return int(input(MsgOptionMenu))
+
+def CompareTwoUsers():
+    MsgGetUser1 = 'Enter the name of user 1: '
+    MsgGetUser2 = 'Enter the name of user 2: '
+    
+    User1 = input(MsgGetUser1)
+    User2 = input(MsgGetUser2)
+
+    print ('Compare users ' + User1 + ' vs ' + User2)
+
+
+    print (' Get profile ID of ' + User1 + '. Please wait.')
+    Tmp = str(urllib.urlopen(URL+"/api/user/"+User1).read())
+    if Tmp.lower().find(str(User1).lower()) == -1:
+        print('\nOups! User 1 ' + User1 + ' not found!')
+        exit()
+    User1 = Tmp[Tmp.find("username\":\"")+11:Tmp.find("\"}]}")]
+    ID1 = Tmp[Tmp.find("\"id\":\"")+6:Tmp.find("\",\"username")]
+
+    print (' Get profile ID of ' + User2 + '. Please wait.')
+    Tmp = str(urllib.urlopen(URL+"/api/user/"+User2).read())
+    if Tmp.lower().find(str(User2).lower()) == -1:
+        print('\nOups! User 2 ' + User2 + ' not found!')
+        exit()
+    User2 = Tmp[Tmp.find("username\":\"")+11:Tmp.find("\"}]}")]
+    ID2 = Tmp[Tmp.find("\"id\":\"")+6:Tmp.find("\",\"username")]
+
+
+    print (' Get Challenges solved by ' + User1 + '. Please wait.')
+    Tmp = urllib.urlopen(URL+'/profile/'+ID1).read()
+    Lst1 = re.findall(b'><div style="width: 150px; display: inline-block"><b>(\S*.*)',Tmp); Lst1.sort()
+    for i in range(len(Lst1)):
+        Lst1[i] = str(Lst1[i]).replace("</a>'","").replace("</a>\"","").replace("</b></div>"," / ").replace("b'","").replace("b\"","")
+
+    print (' Get Challenges solved by ' + User2 + '. Please wait.')
+    Tmp = urllib.urlopen(URL+'/profile/'+ID2).read()
+    Lst2 = re.findall(b'><div style="width: 150px; display: inline-block"><b>(\S*.*)',Tmp); Lst2.sort()
+    for i in range(len(Lst2)):
+        Lst2[i] = str(Lst2[i]).replace("</a>'","").replace("</a>\"","").replace("</b></div>"," / ").replace("b'","").replace("b\"","")
+
+
+    print ('\nSame Challenges solved by ' + User1 + ' AND by ' + User2 + ':')
+    C = 0
+    for k in range(len(Lst2)):
+        if Lst2[k] in Lst1:
+             C += 1
+             print ('\t' + str(Lst2[k]))
+    print (str(C) + ' Challenges have been solved by both ' + User1 + ' AND by ' + User2)
+
+    print ('\nChallenges solved by ' + User1 + ', but NOT by ' + User2 + ':')
+    C = 0
+    for k in range(len(Lst1)):
+        if(not Lst1[k] in Lst2):
+             C += 1
+             print ('\t' + str(Lst1[k]))
+    print (str(C) + ' Challenges have been solved by ' + User1 + ' BUT NOT by ' + User2)
+
+
+    print ('\nChallenges solved by ' + User2 + ', but NOT by ' + User1 + ':')
+    C = 0
+    for k in range(len(Lst2)):
+        if(not Lst2[k] in Lst1):
+             C += 1
+             print ('\t' + str(Lst2[k]))
+    print (str(C) + ' Challenges have been solved by ' + User2 + ' BUT NOT by ' + User1)
+
+def ShowUserInfo():
+    MsgGetUser = 'Enter the name of the user: '
+    
+    User = input(MsgGetUser)
+
+    r = requests.get(APIURLUserInfo.format(user=User))
+    if(r.status_code == 200):
+        user = r.json()
+
+        print('ID: {}'.format(user['user'][0]['id']))
+        print('User: {}'.format(user['user'][0]['username']))
+    else:
+        raise Exception('Request failed')
+
+def ShowUserScore():
+    MsgGetUser = 'Enter the ID of the user: '
+    
+    UserID = int(input(MsgGetUser))
+
+    r = requests.get(APIURLUserScore.format(userid=UserID))
+    if(r.status_code == 200):
+        user = r.json()
+
+        print("WARNING: This API call has some issues and therefore, the data could be false.")
+        print('ID: {}'.format(user['user']))
+        print('Score: {score}/{maxScore}'.format(score=user['score'], maxScore=user['maxscore']))
+        print('Rank: {rank}/{totalPlayers}'.format(rank=user['rank'], totalPlayers=user['totalplayers']))
+        print('Solved: {solved}/{totalChallenges}'.format(solved=user['solved'], totalChallenges=user['totalchallenges']))
+    else:
+        raise Exception('Request failed')
+def ShowChallengeInfo():
+    MsgGetChallengeID = 'Enter the ID of the challenge: '
+    
+    ChallengeID = int(input(MsgGetChallengeID))
+
+    r = requests.get(APIURLChallengeInfo.format(challengeid=ChallengeID))
+    if(r.status_code == 200):
+        challenge = r.json()
+
+        print('ID: {}'.format(challenge['challenge']['id']))
+        print('Title: {}'.format(challenge['challenge']['title']))
+        print('Category: {}'.format(challenge['challenge']['category']))
+        print('Points: {}'.format(challenge['challenge']['points']))
+        print('Author: {}'.format(challenge['challenge']['author']))
+        print('Last Submit: {}'.format(challenge['challenge']['lastSubmit']))
+        print('Validated: {}'.format(challenge['challenge']['validated']))
+    else:
+        raise Exception('Request failed')
+
+def ListUsersByChallenge():
+    MsgGetChallengeID = 'Enter the ID of the challenge: '
+    
+    ChallengeID = int(input(MsgGetChallengeID))
+
+    r = requests.get(APIURLListUserByChallenge.format(challengeid=ChallengeID))
+    if(r.status_code == 200):
+        challenge = r.json()
+
+        print('Solved by: \n\t{}'.format('\n\t'.join([a for a in sorted(challenge['solved'])])))
+        print('Number of solves: {}'.format(len(challenge['solved'])))
+    else:
+        raise Exception('Request failed')
+
+if __name__=='__main__':
+    try:
+        PrintBanner()
+        Choice = MainMenu()
+
+        if(Choice == 1):
+            CompareTwoUsers()
+        if(Choice == 2):
+            ShowUserInfo()
+        if(Choice == 3):
+            ShowUserScore()
+        if(Choice == 4):
+            ShowChallengeInfo()
+        if(Choice == 5):
+            ListUsersByChallenge()
+    except Exception as e:
+        print(e)
+        sys.exit(1)

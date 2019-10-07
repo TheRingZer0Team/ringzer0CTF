@@ -22,4 +22,6 @@
  2019-07-08v2.2: Username case insensitive
 
  2019-10-07v2.3: Fixed typos
+ 
+ 2019-10-07v2.4: Added some new features according to the API
 ```
