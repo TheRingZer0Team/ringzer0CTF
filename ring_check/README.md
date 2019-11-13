@@ -1,6 +1,6 @@
 # ring_check
 
-## Tool to compare two users on RingZer0CTF.com
+## Tool to compare two users on RingZer0CTF.com (and many others features)
 ```
  Initial version by: jusb3
  Rewrote by        : TheIndian, July 4th, 2019
@@ -24,4 +24,17 @@
  2019-10-07v2.3: Fixed typos
  
  2019-10-07v2.4: Added some new features according to the API
+=======
+ 
+ 2019-10-07v2.3: Fixed typos (mbergeron)
+ 
+ 2019-10-07v2.4: Added some new features according to the API (mbergeron)
+ 
+ 2019-11-13v2.5: Display user ID and user profile link when compare 2 users (theindian)
+                 Option 1: Display user ID and user Profile link
+                 Option 2: Display user Profile link
+                 Option 3: Could enter user ID or username
+                 Option 3: Display the username
+                 Option 3: Display user Profile link
+
 ```
