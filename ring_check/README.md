@@ -1,6 +1,6 @@
 # ring_check
 
-## Tool to compare two users on RingZer0CTF.com
+## Tool to compare two users on RingZer0CTF.com (and many others features)
 ```
  Initial version by: jusb3
  Rewrote by        : TheIndian, July 4th, 2019
