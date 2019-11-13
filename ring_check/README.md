@@ -24,7 +24,6 @@
  2019-10-07v2.3: Fixed typos
  
  2019-10-07v2.4: Added some new features according to the API
-=======
  
  2019-10-07v2.3: Fixed typos (mbergeron)
  
