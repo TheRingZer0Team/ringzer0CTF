@@ -25,11 +25,11 @@
  
  2019-10-07v2.4: Added some new features according to the API
  
- 2019-10-07v2.3: Fixed typos (mbergeron)
+ 2019-10-07v2.3: Fixed typos (by mbergeron)
  
- 2019-10-07v2.4: Added some new features according to the API (mbergeron)
+ 2019-10-07v2.4: Added some new features according to the API (by mbergeron)
  
- 2019-11-13v2.5: Display user ID and user profile link when compare 2 users (theindian)
+ 2019-11-13v2.5: (by theindian)
                  Option 1: Display user ID and user Profile link
                  Option 2: Display user Profile link
                  Option 3: Could enter user ID or username
