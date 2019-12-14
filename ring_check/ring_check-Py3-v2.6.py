@@ -213,7 +213,7 @@ def ListSpecialMentionByChallenge():
     if(r.status_code == 200):
         challenge = r.json()
         if(challenge['success'] == 1):
-            print('{}'.format(challenge['challenge']['category']) + ' / {}'.format(challenge['challenge']['title']))
+            print('Challenge: {}'.format(challenge['challenge']['category']) + ' / {}'.format(challenge['challenge']['title']))
             r = requests.get(APIURLListWhoMadeWriteUp.format(challengeid=ChallengeID))
             if(r.status_code == 200):
                 challenger = r.json()
@@ -224,14 +224,12 @@ def ListSpecialMentionByChallenge():
                     else:
                         print('\t{}'.format(challenger['writeup'][User]['user']))
                 print('Number of write up: {}'.format(len(challenger['writeup'])))
-
             else:
                 raise Exception('Request failed')
         else:
             raise Exception('Challenge does not exist!')
     else:
         raise Exception('Request failed')
-
 
 if __name__=='__main__':
     try:
