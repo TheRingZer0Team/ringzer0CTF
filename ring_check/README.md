@@ -36,5 +36,9 @@
                  Option 3: Display the username
                  Option 3: Display user Profile link
  2019-12-14v2.6: Add option 6: List users who made a write up for a challenge (by TheIndian)
-
+ 2019-12-15v2.7: (by TheIndian)
+                 Cosmetic 
+                 Option 5: Display the Challenge category / Challenge name
+                 Option 6: Sort the output list
+                 
 ```
