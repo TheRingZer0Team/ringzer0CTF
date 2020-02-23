@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 '''
-
  Initial version by: jusb3
  Rewrote by        : TheIndian, July 4th, 2019
  Redistribution authorized by jusb3 (Who made the first comparison between two users)
@@ -40,7 +39,6 @@
                   Option 5: Display solved date and sort by date
                   Option 6: Display write-up dat submitted and display by date
                   Cosmetic
-
 '''
 
 import json
