@@ -31,7 +31,7 @@
                   Cosmetic 
                   Option 5: Display the Challenge category / Challenge name
                   Option 6: Sort the output list
- 2020-02-22v2.8:  (by TheIndian)
+ 2020-02-23v2.8:  (by TheIndian)
                   Menu more interactive and sanitized
                   Option 2: Input and output sanitized
                   Option 3: Input and output sanitized
