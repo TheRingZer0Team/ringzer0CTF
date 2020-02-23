@@ -73,7 +73,7 @@ def MainMenu():
     '\t(0) Exit\n'\
     '\n'\
     'You choice: '
-    while True:
+    while not True:
         try:
             entry = int(input(MsgOptionMenu))
             if entry >= 0 and entry <= 6:
