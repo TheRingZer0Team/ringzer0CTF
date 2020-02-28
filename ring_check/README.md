@@ -31,13 +31,5 @@
                   Cosmetic 
                   Option 5: Display the Challenge category / Challenge name
                   Option 6: Sort the output list
- 2020-02-23v2.8:  (by TheIndian)
-                  Menu more interactive and sanitized
-                  Option 2: Input and output sanitized
-                  Option 3: Input and output sanitized
-                            Solved partialy the inaccuracy information provided by the API
-                  Option 4: Input and output sanitized
-                  Option 5: Display solved date and sort by date
-                  Option 6: Display write-up dat submitted and display by date
-                  Cosmetic          
+ 2020-02-28:3.0   (by TheIndian)  IS ON THE ROAD, stay turned...      
 ```
