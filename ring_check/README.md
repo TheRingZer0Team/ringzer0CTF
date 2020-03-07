@@ -1,6 +1,6 @@
 # ring_check
 
-## Tool to compare two users on RingZer0CTF.com (and many others features)
+# Tool to get information about user's and challenges on RingZer0CTF.com
 ```
  Initial version by: jusb3
  Rewrote by        : TheIndian, July 4th, 2019
@@ -11,10 +11,8 @@
      - Display the Challenges solved by User1 but NOT by User2
      - Display the Challenges solved by User2 but NOT by User1
      - Challenges displayed with names instead of with the number
-
  2019-07-08 :     Search improved and accurate
                   Display improved
-
  2019-07-08v2.1:  Use API to retrieve profile ID
                   Display improved
  2019-07-08v2.2:  Username case insensitive
@@ -31,5 +29,25 @@
                   Cosmetic 
                   Option 5: Display the Challenge category / Challenge name
                   Option 6: Sort the output list
- 2020-02-28:3.0   (by TheIndian)  IS ON THE ROAD, stay turned...      
+ 2020-03-07v3.0:  (by TheIndian)
+                  A special thank to @mbergeron for his help to modify on RZ the APIs output for new requirements
+                  A spaciel thank to @davidlebr1 for his help for sanitizing check
+                  Menu sanitized and more interactive
+                  Option 1: Completly rewroted. APIs fully supported
+                            NEW: Output may be sorted as wanted. See Sort1By, Sort2By and Sort3By variables
+                  Option 2: Input and output sanitized
+                            NEW: Show Member since
+                  Option 3: Input and output sanitized
+                            NEW: Show the Number of Special Mention
+                            Partially solved the inaccuracy information provided by the API
+                  Option 4: Input and output sanitized
+                  Option 5: NEW option: Show Challanges solved by a user
+                  Option 6: NEW: Show solved date and sort by date
+                                 Show rank of solved
+                  Option 7: NEW: write-up date submitted and sort by date
+                                 Show rank of solved
+                  Option 8: NEW: Execute unsolved_r0.py
+                  Make sure the script is executed in Python3
+                  New name
+                  Cosmetic      
 ```
