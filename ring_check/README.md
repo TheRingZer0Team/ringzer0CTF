@@ -50,7 +50,6 @@
                   Make sure the script is executed in Python3
                   New name
                   Cosmetic
-
 2020-04-17v3.1:  (by TheIndian)
                   Option 5: Solve problem when user did not solve any Challange
                   Option 6: Sometime, API did not return result by date ordered. Force locally the order by date
