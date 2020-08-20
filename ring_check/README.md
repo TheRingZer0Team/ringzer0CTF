@@ -61,7 +61,6 @@
                   Option 6: Sometime, API did not return result by date ordered. Force locally the order by date
                   Option 7: Sometime, API did not return result by date ordered. Force locally the order by date
 
-
 2020-08-20v4.0b1: (by TheIndian)
                   Support the new APIs published on ~2020-06-17 on R0.
                   Option '2 Show a user information' and '3 Show a user score' merged.
