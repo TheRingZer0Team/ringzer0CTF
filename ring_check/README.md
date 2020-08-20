@@ -2,17 +2,22 @@
 
 # Tool to get information about user's and challenges on RingZer0CTF.com
 ```
- Initial version by: jusb3
+ Initial version by: jusb3 (to compare 2 users)
  Rewrote by        : TheIndian, July 4th, 2019
  Redistribution authorized by jusb3 (Who made the first comparison between two users)
+
+ requirements: pip3 install tabulate
+
  New features:
      - Work with Python3 only
      - Display the same Challenges solved by User1 AND User2
      - Display the Challenges solved by User1 but NOT by User2
      - Display the Challenges solved by User2 but NOT by User1
      - Challenges displayed with names instead of with the number
+
  2019-07-08 :     Search improved and accurate
                   Display improved
+
  2019-07-08v2.1:  Use API to retrieve profile ID
                   Display improved
  2019-07-08v2.2:  Username case insensitive
@@ -26,7 +31,7 @@
                   Option 3: Display user Profile link
  2019-12-14v2.6:  Add option 6: List users who made a write up for a challenge (by TheIndian)
  2019-12-15v2.7:  (by TheIndian)
-                  Cosmetic 
+                  Cosmetic
                   Option 5: Display the Challenge category / Challenge name
                   Option 6: Sort the output list
  2020-03-07v3.0:  (by TheIndian)
@@ -50,10 +55,20 @@
                   Make sure the script is executed in Python3
                   New name
                   Cosmetic
-2020-04-17v3.1:  (by TheIndian)
+
+ 2020-04-17v3.1:  (by TheIndian)
                   Option 5: Solve problem when user did not solve any Challange
                   Option 6: Sometime, API did not return result by date ordered. Force locally the order by date
                   Option 7: Sometime, API did not return result by date ordered. Force locally the order by date
+
+
+2020-08-20v4.0b1: (by TheIndian)
+                  Support the new APIs published on ~2020-06-17 on R0.
+                  Option '2 Show a user information' and '3 Show a user score' merged.
+                  All options reviewed, revamped, accurate with information provided by new APIs.
+                  New: Show Challenges categories information.
+                  New: Show Special Mentions made by a user.
+                  And more...
 
 
 ```
