@@ -2,7 +2,7 @@
 
 '''
 
- Initial version by: jusb3 (to compare 2 users)
+Initial version by: jusb3 (to compare 2 users)
  Rewrote by        : TheIndian, July 4th, 2019
  Redistribution authorized by jusb3 (Who made the first comparison between two users)
 
