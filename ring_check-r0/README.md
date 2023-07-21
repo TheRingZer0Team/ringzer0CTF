@@ -2,7 +2,7 @@
 
 # Tool to get information about user's and challenges on RingZer0CTF.com
 ```
- Initial version by: jusb3 (to compare 2 users)
+Initial version by: jusb3 (to compare 2 users)
  Rewrote by        : TheIndian, July 4th, 2019
  Redistribution authorized by jusb3 (Who made the first comparison between two users)
 
@@ -17,7 +17,6 @@
 
  2019-07-08 :     Search improved and accurate
                   Display improved
-
  2019-07-08v2.1:  Use API to retrieve profile ID
                   Display improved
  2019-07-08v2.2:  Username case insensitive
@@ -55,12 +54,10 @@
                   Make sure the script is executed in Python3
                   New name
                   Cosmetic
-
  2020-04-17v3.1:  (by TheIndian)
                   Option 5: Solve problem when user did not solve any Challange
                   Option 6: Sometime, API did not return result by date ordered. Force locally the order by date
                   Option 7: Sometime, API did not return result by date ordered. Force locally the order by date
-
 2020-08-20v4.0b1: (by TheIndian)
                   Support the new APIs published on ~2020-06-17 on R0.
                   Option '2 Show a user information' and '3 Show a user score' merged.
@@ -68,8 +65,12 @@
                   New: Show Challenges categories information.
                   New: Show Special Mentions made by a user.
                   And more...
-
 2020-12-20v4.1  : (by TheIndian)
                   New: Show write-up made by a user.
+2023-07-21v4.2  : (by TheIndian)
+                  Fix cosmetics
+                  More interactive
+                  Option 7: Show the user country RCEH status. Output can be sorted by date, users, country or RCEH
+                  Work with the APIs changes on 2023-06 and fix APIs to return accurate info.
 
 ```

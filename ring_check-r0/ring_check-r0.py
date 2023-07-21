@@ -17,7 +17,6 @@
 
  2019-07-08 :     Search improved and accurate
                   Display improved
-
  2019-07-08v2.1:  Use API to retrieve profile ID
                   Display improved
  2019-07-08v2.2:  Username case insensitive
@@ -66,14 +65,22 @@
                   New: Show Challenges categories information.
                   New: Show Special Mentions made by a user.
                   And more...
-
 2020-12-20v4.1  : (by TheIndian)
                   New: Show write-up made by a user.
-
+2023-07-21v4.2  : (by TheIndian)
+                  Fix cosmetics
+                  More interactive
+                  Option 7: Show the user country RCEH status. Output can be sorted by date, users, country or RCEH
+                  Work with the APIs changes on 2023-06 and fix APIs to return accurate info.
 
 '''
 
-version = 'version 4.1'
+import json
+import re, sys, os, platform
+import requests
+from tabulate import tabulate
+
+version = 'version 4.2'
 URL  = 'https://ringzer0ctf.com'
 
 APIURLCategories          = URL + '/api/categories'                            # Return Categories of Challenges
@@ -87,11 +94,6 @@ APIURLUserCategory        = URL + '/api/user/category/{userid}/{categoryid}'   #
 APIURLUserSpecialMention  = URL + '/api/user/specialmentions/{userid}'         # Return specials mentions made by a user
 APIURLChallengeUsers      = URL + '/api/challenge/users/{challengeid}'         # Return users who solved a Challenge
 APIURLUserWriteUPs        = URL + '/api/user/writeups/{userid}'                # Return write up made by a user
-
-import json
-import re, sys, os, platform
-import requests
-from tabulate import tabulate
 
 def PrintBanner():
     print('   ___  _          ____          ___')
@@ -115,17 +117,17 @@ def MainMenu():
     '\t(10) Check unsolved challenges.\n'\
     '\t(0)  Exit.\n'\
     '\n'\
-    'You choice: '
+    'Your choice: '
     MaxMenu = 10
     while True:
         try:
-            entry = int(input(MsgOptionMenu))
-            if entry >= 0 and entry <= MaxMenu:
-                return entry
+            Select = int(input(MsgOptionMenu))
+            if Select >= 0 and Select <= MaxMenu:
+                return Select
             else:
-                print (' *** Invalid number. Please retry ***')
+                print(' *** Invalid number. Please retry ***')
         except:
-            print (' *** Invalid input. Please retry ***')
+            print(' *** Invalid input. Please retry ***')
 
 
 def CheckStatusCode(Status, Message):
@@ -135,12 +137,12 @@ def CheckStatusCode(Status, Message):
 
 def GetANumber(Message):
     while True:
-        entry = input(Message)
+        Input = input(Message)
         try:
-            entry = int(entry)
-            return entry
+            Input = int(Input)
+            return Input
         except:
-            print (' *** Invalid number. Please retry ***')
+            print(' *** Invalid number. Please retry ***')
 
 
 def CompareTwoUsers():
@@ -149,33 +151,33 @@ def CompareTwoUsers():
     #
     User1 = input('Enter the ID or username for user 1: ')
     User2 = input('Enter the ID or username for user 2: ')
-    print ('Compare users \'{}\' vs \'{}\''.format(User1, User2))
+    print('Compare users \'{}\' vs \'{}\''.format(User1, User2))
 
     # Get User1 ID
-    print ('  Get profile ID of \'{}\'. Please wait.'.format(User1))
+    print('  Get profile ID of \'{}\'. Please wait.'.format(User1))
     r1 = requests.get(APIURLUserInfo.format(userid=User1))
     CheckStatusCode(r1, 'Request failed user \'{}\'.'.format(User1))
     r1 = r1.json()
-    if r1['success'] == 0:
-        print('\nOups! User 1 \'{}\' not found. Please retry.\n'.format(User1))
-        sys.exit(1)
+    if r1['success'] != 1 or r1['data']['users'][0]['user']['username'] == None:
+        input('\nOups! User 1 \'{}\' not found. Please retry.'.format(User1))
+        return
     User1 = r1['data']['users'][0]['user']['username']
     ID1   = r1['data']['users'][0]['user']['id']
 
     # Get User2 ID
-    print ('  Get profile ID of \'{}\'. Please wait.'.format(User2))
+    print('  Get profile ID of \'{}\'. Please wait.'.format(User2))
     r2 = requests.get(APIURLUserInfo.format(userid=User2))
     CheckStatusCode(r2, 'Request failed user \'{}\'.'.format(User2))
     r2 = r2.json()
-    if r2['success'] == 0:
-        print('\nOups! User 2 \'{}\' not found. Please retry.\n'.format(User2))
-        sys.exit(1)
+    if r2['success'] != 1 or r2['data']['users'][0]['user']['username'] == None:
+        input('\nOups! User 2 \'{}\' not found. Please retry.\n'.format(User2))
+        return
     User2 = r2['data']['users'][0]['user']['username']
     ID2   = r2['data']['users'][0]['user']['id']
 
     # Get Challenges completed by User1
-    print ('  Get Challenges solved by \'{}\' (ID: {}). Please wait.'.format(User1, ID1))
-    print ('    Profile: {}/profile/{}/{}'.format(URL, ID1, User1))
+    print('  Get Challenges solved by \'{}\' (ID: {}). Please wait.'.format(User1, ID1))
+    print('    Profile: {}/profile/{}/{}'.format(URL, ID1, User1))
     Lst1   = []
     LstID1 = []
     for i in range(len(r1['data']['categories'])):
@@ -191,8 +193,8 @@ def CompareTwoUsers():
                     LstID1.append(Solved['data']['categories'][0]['category']['challenges'][j]['challenge']['id'])
 
     # Get Challenges completed by User2
-    print ('  Get Challenges solved by \'{}\' (ID: {}). Please wait.'.format(User2, ID2))
-    print ('    Profile: {}/profile/{}/{}'.format(URL, ID2, User2))
+    print('  Get Challenges solved by \'{}\' (ID: {}). Please wait.'.format(User2, ID2))
+    print('    Profile: {}/profile/{}/{}'.format(URL, ID2, User2))
     Lst2   = []
     LstID2 = []
     for i in range(len(r2['data']['categories'])):
@@ -220,44 +222,44 @@ def CompareTwoUsers():
     #
     # Display Same Challenges solved by User1 AND by User2
     #
-    print ('\nSame Challenges solved by \'{}\' AND by \'{}\':'.format(User1, User2))
+    print('\nSame Challenges solved by \'{}\' AND by \'{}\':'.format(User1, User2))
     List = []; Points1 = int()
     for i in range(len(LstID1)):
         if LstID1[i] in LstID2:
             List.append(Lst1[i])
             Points1 += Lst1[i][1]
     List = sorted(List, key = lambda x: (x[Sort1By], x[Sort2By], x[Sort3By]))   # Sort as wanted
-    print (tabulate(List, headers=['ID:', 'Points:', 'Category:', 'Title:']))
-    print ('\n{} Challenges have been solved by both \'{}\' AND by \'{}\' - ({} points)'.format(len(List), User1, User2, Points1))
+    print(tabulate(List, headers=['ID:', 'Points:', 'Category:', 'Title:']))
+    print('\n{} Challenges have been solved by both \'{}\' AND by \'{}\' - ({} points)'.format(len(List), User1, User2, Points1))
 
     #
     # Display Challenges solved by User1 but NOT by User2
     #
-    print ('\nChallenges solved by \'{}\' but NOT by \'{}\':'.format(User1, User2))
+    print('\nChallenges solved by \'{}\' but NOT by \'{}\':'.format(User1, User2))
     List = []; Points2 = int()
     for i in range(len(LstID1)):
         if LstID1[i] not in LstID2:
             List.append(Lst1[i])
             Points2 += Lst1[i][1]
     List = sorted(List, key = lambda x: (x[Sort1By], x[Sort2By], x[Sort3By]))   # Sort as wanted
-    print (tabulate(List, headers=['ID:', 'Points:', 'Category:', 'Title:']))
-    print ('\n{} Challenges solved by \'{}\' but NOT by \'{}\' - ({} points)'.format(len(List), User1, User2, Points2))
+    print(tabulate(List, headers=['ID:', 'Points:', 'Category:', 'Title:']))
+    print('\n{} Challenges solved by \'{}\' but NOT by \'{}\' - ({} points)'.format(len(List), User1, User2, Points2))
 
     #
     # Display Challenges solved by User1 but NOT by User2
     #
-    print ('\nChallenges solved by \'{}\' but NOT by \'{}\':'.format(User2, User1))
+    print('\nChallenges solved by \'{}\' but NOT by \'{}\':'.format(User2, User1))
     List = []; Points3 = int()
     for i in range(len(LstID2)):
         if LstID2[i] not in LstID1:
             List.append(Lst2[i])
             Points3 += Lst2[i][1]
     List = sorted(List, key = lambda x: (x[Sort1By], x[Sort2By], x[Sort3By]))   # Sort as wanted
-    print (tabulate(List, headers=['ID:', 'Points:', 'Category:', 'Title:']))
-    print ('\n{} Challenges solved by \'{}\' but NOT by \'{}\' - ({} points)\n'.format(len(List), User2, User1, Points3))
-    print ('The user \'{}\' has {} points.  '.format(User1, Points1 + Points2))
-    print ('The user \'{}\' has {} points.\n'.format(User2, Points1 + Points3))
-
+    print(tabulate(List, headers=['ID:', 'Points:', 'Category:', 'Title:']))
+    print('\n{} Challenges solved by \'{}\' but NOT by \'{}\' - ({} points)\n'.format(len(List), User2, User1, Points3))
+    print('The user \'{}\' has {} points.  '.format(User1, Points1 + Points2))
+    print('The user \'{}\' has {} points.\n'.format(User2, Points1 + Points3))
+    input('Press ENTER to continue') ; print('\n')
 
 def ShowUserInfo():
     #
@@ -269,7 +271,7 @@ def ShowUserInfo():
     CheckStatusCode(r, 'Request failed to get user \'{}\''.format(User))
     user = r.json()
     Solved = 0; NbrChals = 0;
-    if user['success'] == 1: 
+    if user['success'] == 1 and user['data']['users'][0]['user']['username'] != None:
         print('\nID:               {}'.format(user['data']['users'][0]['user']['id']))
         print('Username:         {}'.format(user['data']['users'][0]['user']['username']))
         print('Country:          {}'.format(user['data']['users'][0]['user']['country']))
@@ -293,11 +295,12 @@ def ShowUserInfo():
         List = sorted(List, key = lambda x: (x[1]))
         List.append(['','------------------------', '---------'])
         List.append(['', 'Total Challenges solved:', str(Solved) + ' / ' + str(NbrChals)])
-        print (tabulate(List, headers=['', 'Title:', 'Completed:']))
-        print ('\n')
+        print(tabulate(List, headers=['', 'Title:', 'Completed:']))
+        print('\n')
+        input('Press ENTER to continue.'); print('\n')
     else:
-        raise Exception ('\nOups! ID or username \'{}\' not found. Please retry.\n'.format(User))
-
+        input('\nOups! ID or username \'{}\' not found. Please retry.'.format(User))
+        
 
 def ShowChallengeInfo():
     #
@@ -318,29 +321,39 @@ def ShowChallengeInfo():
         print('Author:          {}'.format(challenge['data']['categories'][0]['category']['challenges'][0]['challenge']['author']))
         print('Solved:          {}'.format(challenge['data']['categories'][0]['category']['challenges'][0]['challenge']['numberOfSolves']))
         print('Write-up:        {}'.format(challenge['data']['categories'][0]['category']['challenges'][0]['challenge']['numberOfWriteUps']))
-        print('Last solved by:  {} on {}\n'.format(challenge['data']['categories'][0]['category']['challenges'][0]['challenge']['lastSubmitUserName'], \
-                                                   challenge['data']['categories'][0]['category']['challenges'][0]['challenge']['lastSubmitDate']))
+        if challenge['data']['categories'][0]['category']['challenges'][0]['challenge']['numberOfSolves'] == '0':
+            print('Last solved by:  nobody\n')
+        else:
+            print('Last solved by:  {} on {}\n'.format(challenge['data']['categories'][0]['category']['challenges'][0]['challenge']['lastSubmitUserName'], \
+                                                       challenge['data']['categories'][0]['category']['challenges'][0]['challenge']['lastSubmitDate']))
+        input('Press ENTER to continue.'); print('\n')
     else:
-        raise Exception ('\nOups! Challenge \'{}\' doesn\'t exist.\n'.format(ChallengeID))
+        input('\nOups! Challenge \'{}\' doesn\'t exist.'.format(ChallengeID))
+        print ('\n')
 
 
 def ShowCategories():
     #
     # Option 4: Show Challenges Categories
     #
-    print ('\n')
+    print('\n')
     r = requests.get(APIURLCategories)
     CheckStatusCode(r, 'Request failed.')
     categories = r.json()
     List = []
+    TotalOfChals = 0
     if categories['success'] == 1:
         for i in range(len(categories['data']['categories'])):
             List.append([categories['data']['categories'][i]['category']['title'], \
                          categories['data']['categories'][i]['category']['id'], \
                          categories['data']['categories'][i]['category']['numberOfChallenges']])
+            TotalOfChals += int(categories['data']['categories'][i]['category']['numberOfChallenges'])
+
     List = sorted(List, key = lambda x: (x[0], x[1], x[2]))
-    print (tabulate(List, headers=['Title:', 'ID:', '#Chal:']))
-    print ('\nNumber of categories: {}'.format(len(categories['data']['categories'])))
+    print(tabulate(List, headers=['Title:', 'ID:', '#Chal:']))
+    print('\nNumber of categories: {}'.format(len(categories['data']['categories'])))
+    print('Total of Challenges:  {}\n'.format(TotalOfChals))
+    input('Press ENTER to continue') ; print('\n')
 
 
 def ShowChallengesSolvedByUser():
@@ -352,27 +365,27 @@ def ShowChallengesSolvedByUser():
     r = requests.get(APIURLUserInfo.format(userid=Username))
     CheckStatusCode(r, 'Request failed to get user \'{}\''.format(Username))
     User = r.json()
-    if User['success'] == 1:
+    if User['success'] == 1 and User['data']['users'][0]['user']['username'] != None:
         Username = User['data']['users'][0]['user']['username']
         ID   =     User['data']['users'][0]['user']['id']
-        print ('  Get Challenges solved by \'{}\' (ID: {}). Please wait.'.format(Username, ID))
-        print ('    Profile: {}/profile/{}/{}\n'.format(URL, ID, Username))
-        Message = 'How would you like to sort by?\n 0 = date (defaut), 1 = category, 2 = Challange name, 3 = Points, 4 = ID\nYou choice: '
+        print('  Get Challenges solved by \'{}\' (ID: {}). Please wait.'.format(Username, ID))
+        print('    Profile: {}/profile/{}/{}\n'.format(URL, ID, Username))
+        Message = 'How would you like to sort by?\n 0 = date (defaut), 1 = category, 2 = Challange name, 3 = Points, 4 = ID\nYour choice: '
         true = True
         while true:
-            entry = input(Message)
+            SortBy = input(Message)
             try:
-                entry = int(entry)
-                if 0 <= entry and entry <= 4:
+                SortBy = int(SortBy)
+                if 0 <= SortBy and SortBy <= 4:
                     break
                 else:
-                    print (' *** Invalid number. Please retry ***')
+                    print(' *** Invalid number. Please retry ***')
             except:
-                if entry == '':
-                    entry = 0       # Default, sort by date
+                if SortBy == '':
+                    SortBy = 0       # Default, sort by date
                     true = False
                 else:
-                    print (' *** Invalid number. Please retry ***')
+                    print(' *** Invalid number. Please retry ***')
         print('Retrieving Challenges solved by \'{}\'. Please wait...'.format(Username))
         List   = []; Points = int()
         NbrChal, NbrSolved = 0, 0
@@ -390,11 +403,12 @@ def ShowChallengesSolvedByUser():
                                  int(Solved['data']['categories'][0]['category']['challenges'][j]['challenge']['points']), \
                                  int(Solved['data']['categories'][0]['category']['challenges'][j]['challenge']['id']) ])
                         Points += int(Solved['data']['categories'][0]['category']['challenges'][j]['challenge']['points'])
-        List = sorted(List, key = lambda x: (x[entry]))
-        print ('\n', tabulate(List, headers=['Date:', 'Category:', 'Title:', 'Points:', 'ID:']))
-        print ('\n The total points for \'{}\' is {} in {} Challenges solved on {}.\n'.format(Username, Points, NbrSolved, NbrChal))
+        List = sorted(List, key = lambda x: (x[SortBy]))
+        print('\n', tabulate(List, headers=['Date:', 'Category:', 'Title:', 'Points:', 'ID:']))
+        print('\n The total points for \'{}\' is {} in {} Challenges solved on {}.\n'.format(Username, Points, NbrSolved, NbrChal))
+        input('Press ENTER to continue') ; print('\n')
     else:
-        raise Exception ('\nOups! ID or username \'{}\' not found. Please retry.\n'.format(Username))
+        input('\nOups! ID or username \'{}\' not found. Please retry.'.format(Username))
 
 
 def ShowWriteUpByUser():
@@ -406,11 +420,11 @@ def ShowWriteUpByUser():
     r = requests.get(APIURLUserInfo.format(userid=Username))
     CheckStatusCode(r, 'Request failed to get user \'{}\''.format(Username))
     User = r.json()
-    if User['success'] == 1:
+    if User['success'] == 1 and User['data']['users'][0]['user']['username'] != None:
         Username = User['data']['users'][0]['user']['username']
         UserID   = User['data']['users'][0]['user']['id']
-        print ('  Get Writeups made by \'{}\' (ID: {}). Please wait.'.format(Username, UserID))
-        print ('    Profile: {}/profile/{}/{}'.format(URL, UserID, Username))
+        print('\n  Get Writeups made by \'{}\' (ID: {}). Please wait.'.format(Username, UserID))
+        print('    Profile: {}/profile/{}/{}'.format(URL, UserID, Username))
         print('Retrieving Challenges solved by \'{}\'. Please wait...'.format(Username))
         List   = [];
         WUs = {}
@@ -462,12 +476,12 @@ def ShowWriteUpByUser():
                                      id, receivedTime, isSpecialMention, approved \
                                     ])
         List = sorted(List, key = lambda x: (x[2]))
-        print ('\n', tabulate(List, headers=['ID:', 'Title:', 'Date of solve:', 'DocID:', 'Write-up date:', 'S.M.:', 'Approved:']), '\n')
-        print ('User \'{}\' has {} write-ups on {} Challenges solved, {} points, {} special mentions, {} coins.\n'.format(Username, NbrWriteUp, \
+        print('\n', tabulate(List, headers=['ID:', 'Title:', 'Date of solve:', 'DocID:', 'Write-up date:', 'S.M.:', 'Approved:']), '\n')
+        print('User \'{}\' has {} write-ups on {} Challenges solved, {} points, {} special mentions, {} coins.\n'.format(Username, NbrWriteUp, \
                 NbrSolved, NbrPoints, NbrSMs, User['data']['users'][0]['user']['coins']))
-
+        input('Press ENTER to continue') ; print('\n')
     else:
-        raise Exception ('\nOups! ID or username \'{}\' not found. Please retry.\n'.format(Username))
+        input('\nOups! ID or username \'{}\' not found. Please retry.'.format(Username))
 
 
 def ShowWhoSolvedChallenge():
@@ -485,31 +499,57 @@ def ShowWhoSolvedChallenge():
             Limit = '/' + str(Limit)
         else:
             Limit = ''
+        Message = 'How would you like to sort by?\n 0 = date (defaut), 1 = users, 2 = country, 3 = RCEH\nYour choice: '
+        true = True
+        while true:
+            SortBy = input(Message)
+            try:
+                SortBy = int(SortBy)
+                if 0 <= SortBy and SortBy <= 3:
+                    break
+                else:
+                    print(' *** Invalid number. Please retry ***')
+            except:
+                if SortBy == '':
+                    SortBy = 0       # Default, sort by date
+                    true = False
+                else:
+                    print(' *** Invalid number. Please retry ***')
+
         print('\nChallange name: {} / {} / {} points.'.format(\
                 challenge['data']['categories'][0]['category']['title'],
                 challenge['data']['categories'][0]['category']['challenges'][0]['challenge']['title'],
                 challenge['data']['categories'][0]['category']['challenges'][0]['challenge']['points'] ))
         r = requests.get((APIURLChallengeUsers+Limit).format(challengeid=ChallengeID))
         CheckStatusCode(r, 'Request failed to get Challange \'{}\''.format(ChallengeID))
-        print ('\nSolved by:\n')
+        print('\nSolved by:\n')
         Users = r.json()
         List = []
         for i in range(len(Users['data']['categories'][0]['category']['challenges'][0]['challenge']['Solvers'])):
+            if Users['data']['users'][i]['user']['isRCEH'] == True:
+                isRCEH = "Yes"
+            else:
+                isRCEH = ""
+
             List.append([Users['data']['categories'][0]['category']['challenges'][0]['challenge']['Solvers'][i]['Solver']['validationTime'], \
-                         Users['data']['users'][i]['user']['username']])
-        List = (sorted(List))
+                         Users['data']['users'][i]['user']['username'], \
+                         Users['data']['users'][i]['user']['country'], \
+                         isRCEH])
+        # ORIG List = (sorted(List))
+        List = sorted(List, key = lambda x: (x[SortBy]))
         Submit = []
         for i in range(len(List)):
-            Submit.append([i+1, List[i][0],  List[i][1]])
-        print (tabulate(Submit, headers=['Rank:', 'Submitted:', 'Users:']))
+            Submit.append([i+1, List[i][0],  List[i][1], List[i][2], List[i][3]])
+        print(tabulate(Submit, headers=['Rank:', 'Submitted:', 'Users:', 'Country', 'isRCEH']))
         if Limit == '':
             print('\nNumber of solves: {}\n'.format(challenge['data']['categories'][0]['category']['challenges'][0]['challenge']['numberOfSolves']))
         else:
             print('\nNumber of solves {}, but retrieved only the last {}.\n'.format(\
                     challenge['data']['categories'][0]['category']['challenges'][0]['challenge']['numberOfSolves'], \
                     len(Users['data']['categories'][0]['category']['challenges'][0]['challenge']['Solvers'])))
+        input('Press ENTER to continue') ; print('\n')
     else:
-        raise Exception ('\nOups! Challenge \'{}\' doesn\'t exist.\n'.format(ChallengeID))
+        input('\nOups! Challenge \'{}\' doesn\'t exist.'.format(ChallengeID))
 
 
 def ShowWriteUp():
@@ -534,12 +574,14 @@ def ShowWriteUp():
         CheckStatusCode(r, 'Request failed to get Challange \'{}\''.format(ChallengeID))
         Users = r.json()
         List = []
+        SMs = 0
         for i in range(len(Users['data']['users'])):
             if Users['data']['categories'][0]['category']['challenges'][0]['challenge']['writeUps'][i]['writeUp']['isSpecialMention'] == True:
                 List.append([Users['data']['categories'][0]['category']['challenges'][0]['challenge']['writeUps'][i]['writeUp']['receivedTime'], \
                              Users['data']['categories'][0]['category']['challenges'][0]['challenge']['writeUps'][i]['writeUp']['id'], \
                              Users['data']['users'][i]['user']['username'], \
                              'Special Mention' ])
+                SMs += 1
             else:
                 List.append([Users['data']['categories'][0]['category']['challenges'][0]['challenge']['writeUps'][i]['writeUp']['receivedTime'], \
                              Users['data']['categories'][0]['category']['challenges'][0]['challenge']['writeUps'][i]['writeUp']['id'], \
@@ -549,15 +591,16 @@ def ShowWriteUp():
         WriteUp = []
         for i in range(len(List)):
             WriteUp.append([i+1, List[i][0],  List[i][1],  List[i][2], List[i][3]])
-        print ('\n', tabulate(WriteUp, headers=['Rank:', 'Submitted:', 'Doc ID:', 'Username:', 'Special Mention:']))
+        print('\n', tabulate(WriteUp, headers=['Rank:', 'Submitted:', 'Doc ID:', 'Username:', 'Special Mention:']))
         if Limit == '':
-            print('\nNumber of write up: {}\n'.format(challenge['data']['categories'][0]['category']['challenges'][0]['challenge']['numberOfWriteUps']))
+            print('\nThis Challange contain {} Special Mention on a total {} write-up.\n'.format(SMs, challenge['data']['categories'][0]['category']['challenges'][0]['challenge']['numberOfWriteUps']))
         else:
             print('\nNumber of write up {}, but retrieved only the last {} (priorizing the Specials Mentions).\n'.format(\
                     challenge['data']['categories'][0]['category']['challenges'][0]['challenge']['numberOfWriteUps'], \
                     len(Users['data']['users'])))
+        input('Press ENTER to continue') ; print('\n')
     else:
-        raise Exception('\nOups! Challenge \'{}\' does not exist.\n'.format(ChallengeID))
+        input('\nOups! Challenge \'{}\' does not exist.\n'.format(ChallengeID))
 
 
 def ShowSpecialMentionByUser():
@@ -565,7 +608,7 @@ def ShowSpecialMentionByUser():
     # Option 9: Show Special Mention made by a user
     #
     User = input('Enter the ID or username: ')
-    print ('  Get profile ID of \'{}\'. Please wait.'.format(User))
+    print('  Get profile ID of \'{}\'. Please wait.'.format(User))
     r = requests.get(APIURLUserSpecialMention.format(userid=User))
     CheckStatusCode(r, 'Request failed user \'{}\'.'.format(User))
     sm = r.json()
@@ -582,11 +625,11 @@ def ShowSpecialMentionByUser():
                              sm['data']['categories'][i]['category']['challenges'][j]['challenge']['title'], \
                              sm['data']['categories'][i]['category']['challenges'][j]['challenge']['writeUps'][0]['writeUp']['id'] ])
         WriteUp = sorted(List, key = lambda x: (x[0], x[1], x[3], x[4]))   # Sort as wanted
-        print ('\n', tabulate(WriteUp, headers=['Submitted:', 'Category:', 'ChalID:', 'Title:', 'DocID:']))
+        print('\n', tabulate(WriteUp, headers=['Submitted:', 'Category:', 'ChalID:', 'Title:', 'DocID:']))
         print('\nNumber of write up: {}\n'.format(len(List)))
-
+        input('Press ENTER to continue') ; print('\n')
     else:
-        raise Exception ('\nOups! ID or username \'{}\' not found. Please retry.\n'.format(User))
+        input('\nOups! ID or username \'{}\' not found. Please retry.'.format(User))
 
 
 def UnsolvedRing0():
@@ -598,15 +641,16 @@ def UnsolvedRing0():
     #
     Unsolver = './unsolved_r0.py'
     if not os.path.isfile(Unsolver):
-        print ('\nOups! The script \'{}\' does not exist!'.format(Unsolver))
-        print ('\n Make sure to have the latest \'{}\' script locally. Could be found at:'.format(Unsolver))
-        print ('   New version:   https://github.com/theindianCTF/R0Unsolved')
-        print ('   Original from: https://github.com/JesseEmond/R0Unsolved')
+        print('\nOups! The script \'{}\' does not exist!'.format(Unsolver))
+        print('\n Make sure to have the latest \'{}\' script locally. Could be found at:'.format(Unsolver))
+        print('   New version:   https://github.com/theindianCTF/R0Unsolved')
+        print('   Original from: https://github.com/JesseEmond/R0Unsolved')
         raise Exception ('\nPlease verify.\n')
     MsgGetUser = '\nEnter the ID or username: '
     User = input(MsgGetUser)
     os.system('{} {}'.format(Unsolver, User) )
-    print ('\n')
+    print('\n')
+    input('Press ENTER to continue') ; print('\n')
 
 
 if __name__=='__main__':
@@ -615,29 +659,30 @@ if __name__=='__main__':
         if platform.python_version()[0:2] != '3.':
             raise Exception('\nOups! This script is executable on Python3 only!\n')
         PrintBanner()
-        Choice = MainMenu()
-        if(Choice == 1):
-            CompareTwoUsers()
-        if(Choice == 2):
-            ShowUserInfo()
-        if(Choice == 3):
-            ShowChallengeInfo()
-        if(Choice == 4):
-            ShowCategories()
-        if(Choice == 5):
-            ShowChallengesSolvedByUser()
-        if(Choice == 6):
-            ShowWriteUpByUser()
-        if(Choice == 7):
-            ShowWhoSolvedChallenge()
-        if(Choice == 8):
-            ShowWriteUp()
-        if(Choice == 9):
-            ShowSpecialMentionByUser()
-        if(Choice == 10):
-            UnsolvedRing0()
-        if(Choice == 0):
-            raise Exception('Thank for using this script')
+        while True:
+            Choice = MainMenu()
+            if(Choice == 1):
+                CompareTwoUsers()
+            if(Choice == 2):
+                ShowUserInfo()
+            if(Choice == 3):
+                ShowChallengeInfo()
+            if(Choice == 4):
+                ShowCategories()
+            if(Choice == 5):
+                ShowChallengesSolvedByUser()
+            if(Choice == 6):
+                ShowWriteUpByUser()
+            if(Choice == 7):
+                ShowWhoSolvedChallenge()
+            if(Choice == 8):
+                ShowWriteUp()
+            if(Choice == 9):
+                ShowSpecialMentionByUser()
+            if(Choice == 10):
+                UnsolvedRing0()
+            if(Choice == 0):
+                raise Exception('Thank for using this script')
     except Exception as e:
         print(e)
         sys.exit(1)
